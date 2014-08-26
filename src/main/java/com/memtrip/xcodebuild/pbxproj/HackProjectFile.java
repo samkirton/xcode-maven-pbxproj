@@ -18,7 +18,11 @@ public class HackProjectFile {
 	private static final String PBX_GROUP_CHILDREN = "path = %s;";
 	private static final String PBX_SOURCES_BUILD_PHASE = "/* End PBXSourcesBuildPhase section */";
 	
-	public static String update(String projectName, String filePath, ArrayList<ExtraFileModel> extraFileModelList) throws IOException {
+	public static String update(String projectName, 
+			String filePath, 
+			String headerPath,
+			String classPath,
+			ArrayList<ExtraFileModel> extraFileModelList) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		final String newLine = System.getProperty("line.separator");
 		
@@ -35,7 +39,7 @@ public class HackProjectFile {
 		    	sb.insert(position-positionOffset, value);
 		    	position += value.length();
 		    } else if (line.contains(PBX_FILE_REFERENCE)) {
-		    	String value = generatePBXBuildFileReference(extraFileModelList);
+		    	String value = generatePBXBuildFileReference(extraFileModelList, headerPath, classPath);
 		    	sb.insert(position, value);
 		    	position += value.length();
 		    } else if (line.contains(String.format(PBX_GROUP_CHILDREN, projectName))) {
@@ -96,13 +100,13 @@ public class HackProjectFile {
 	 * @param	extraFileModelList	The extraFileModelList to build the PBXBuildFileReference for
 	 * @return	The PBXBuildFileReference file references
 	 */
-	private static String generatePBXBuildFileReference(ArrayList<ExtraFileModel> extraFileModelList) {
+	private static String generatePBXBuildFileReference(ArrayList<ExtraFileModel> extraFileModelList, String headerPath, String classPath) {
 		String value = "";
 		for (ExtraFileModel extraFileModel : extraFileModelList) {
 			if (extraFileModel.getFileType() == ExtraFileModel.TYPE_H) {
-				value += "\t\t" + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = generated/ios/h/" + extraFileModel.getSimpleFileName() + "; sourceTree = \"<group>\"; };\n";
+				value += "\t\t" + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = " + headerPath + extraFileModel.getSimpleFileName() + "; sourceTree = \"<group>\"; };\n";
 			} else {
-				value += "\t\t" + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = generated/ios/m/" + extraFileModel.getSimpleFileName() + "; sourceTree = \"<group>\"; };\n";
+				value += "\t\t" + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = " + classPath + extraFileModel.getSimpleFileName() + "; sourceTree = \"<group>\"; };\n";
 			}
 		}
 		return value;

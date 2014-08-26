@@ -24,37 +24,49 @@ public class EntryPoint extends AbstractMojo {
 	private String projectName;
 	
 	/**
+	 * The dir of the extra header files that should be added to the xcode project, the path should 
+	 * be a local to the project source folder.
+	 * @parameter
+	 */
+	private String extraHeaderFilesDir;
+	
+	/**
+	 * The dir of the extra class files that should be added to the xcode project, the path should 
+	 * be a local to the project source folder.
+	 * @parameter
+	 */
+	private String extraClassFilesDir;
+	
+	/**
+	 * The dir of the project source code
+	 * @parameter
+	 */
+	private String projectSourceDir;
+	
+	/**
 	 * The location of the .pbxproj file that will be changed to support the extra m / h files
 	 * @parameter
 	 */
 	private String pbxprojDir;
 	
-	/**
-	 * Extra .m sources that should be added to the .pbxproj
-	 * @parameter
-	 */
-	private String extraMSourcesDir;
-	
-	/**
-	 * Extra .h sources that should be added to the .pbxproj
-	 * @parameter
-	 */
-	private String extraHSourcesDir;
-	
 	public void setProjectName(String newVal) {
 		projectName = newVal;
 	}
 	
+	public void setExtraHeaderFilesDir(String newVal) {
+		extraHeaderFilesDir = newVal;
+	}
+	
+	public void setExtraClassFilesDir(String newVal) {
+		extraClassFilesDir = newVal;
+	}
+	
+	public void setProjectSourceDir(String newVal) {
+		projectSourceDir = newVal;
+	}
+	
 	public void setPbxprojDir(String newVal) {
 		pbxprojDir = newVal;
-	}
-	
-	public void setExtraMSourcesDir(String newVal) {
-		extraMSourcesDir = newVal;
-	}
-	
-	public void setExtraHSourcesDir(String newVal) {
-		extraHSourcesDir = newVal;
 	}
 	
 	@Override
@@ -62,7 +74,7 @@ public class EntryPoint extends AbstractMojo {
 		if (projectName == null)
 			throw new IllegalStateException("<projectName></projectName> configuration could not be found");
 		
-		if (pbxprojDir != null && extraMSourcesDir != null && extraHSourcesDir != null) {
+		if (projectSourceDir != null && pbxprojDir != null && extraHeaderFilesDir != null && extraClassFilesDir != null) {
 			File pbxProjFile = new File(pbxprojDir);
 			ArrayList<ExtraFileModel> extraFileModelList = buildExtraFileModelList();
 			
@@ -72,7 +84,7 @@ public class EntryPoint extends AbstractMojo {
 			// modify the pbxproj file with the extra M / H sources
 			String pbxprojSource = null;
 			try {
-				pbxprojSource = HackProjectFile.update(projectName, pbxprojDir, extraFileModelList);
+				pbxprojSource = HackProjectFile.update(projectName, pbxprojDir, extraHeaderFilesDir, extraClassFilesDir, extraFileModelList);
 			} catch (IOException e) { 
 				throw new IllegalStateException(e.getMessage());
 			}
@@ -95,8 +107,8 @@ public class EntryPoint extends AbstractMojo {
 		ArrayList<String> extraMSources = new ArrayList<String>();
 		ArrayList<String> extraHSources = new ArrayList<String>();
 		
-		FileUtils.getFilePaths(new File(extraMSourcesDir), ".m", extraMSources);
-		FileUtils.getFilePaths(new File(extraHSourcesDir), ".h", extraHSources);
+		FileUtils.getFilePaths(new File(projectSourceDir + extraClassFilesDir), ".m", extraMSources);
+		FileUtils.getFilePaths(new File(projectSourceDir + extraHeaderFilesDir), ".h", extraHSources);
 		ArrayList<ExtraFileModel> extraFileModelList = FileUtils.generateHackProjectFileList(extraMSources, ExtraFileModel.TYPE_M);
 		extraFileModelList.addAll(FileUtils.generateHackProjectFileList(extraHSources, ExtraFileModel.TYPE_H));
 		return extraFileModelList;

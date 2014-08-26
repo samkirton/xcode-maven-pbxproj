@@ -12,9 +12,10 @@ public class EntryPointJar {
 		try {
 			// Provide these values to test the plugin from the java entry point
 			EntryPoint entryPoint = new EntryPoint();
-			entryPoint.setExtraHSourcesDir("");
-			entryPoint.setExtraMSourcesDir("");
+			entryPoint.setProjectSourceDir("");
 			entryPoint.setPbxprojDir("");
+			entryPoint.setExtraClassFilesDir("");
+			entryPoint.setExtraHeaderFilesDir("");
 			entryPoint.setProjectName("");
 			entryPoint.execute();
 		} catch (MojoExecutionException e) {
