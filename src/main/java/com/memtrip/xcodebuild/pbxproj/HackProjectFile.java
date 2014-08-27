@@ -56,7 +56,7 @@ public class HackProjectFile {
 		    
 		    sb.append(line).append(newLine);
 		    position+=line.length();
-		    position+=1; // factor in new lines
+		    position+=1; // include new lines (\n)
 		}
 	
 		return sb.toString();
@@ -69,6 +69,7 @@ public class HackProjectFile {
 	 */
 	private static String generatePBXBuildFileLine(ArrayList<ExtraFileModel> extraFileModelList) {
 		String value = "\n";
+		
 		for (ExtraFileModel extraFileModel : extraFileModelList) {
 			if (extraFileModel.getFileType() == ExtraFileModel.TYPE_H) {
 				value += "\t\t" + extraFileModel.getBuildRef() + " /* " + extraFileModel.getSimpleFileName() + " in Copy Files */ = {isa = PBXBuildFile; fileRef = " + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */;};\n";
@@ -87,6 +88,7 @@ public class HackProjectFile {
 	 */
 	private static String generatePBXCopyFiles(ArrayList<ExtraFileModel> extraFileModelList) {
 		String value = "";
+		
 		for (ExtraFileModel extraFileModel : extraFileModelList) {
 			if (extraFileModel.getFileType() == ExtraFileModel.TYPE_H) {
 				value += "\t\t\t\t" + extraFileModel.getBuildRef() + " /* " + extraFileModel.getSimpleFileName() + " in Copy Files */,\n";
@@ -102,6 +104,7 @@ public class HackProjectFile {
 	 */
 	private static String generatePBXBuildFileReference(ArrayList<ExtraFileModel> extraFileModelList, String headerPath, String classPath) {
 		String value = "";
+		
 		for (ExtraFileModel extraFileModel : extraFileModelList) {
 			if (extraFileModel.getFileType() == ExtraFileModel.TYPE_H) {
 				value += "\t\t" + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = " + headerPath + extraFileModel.getSimpleFileName() + "; sourceTree = \"<group>\"; };\n";
@@ -109,6 +112,7 @@ public class HackProjectFile {
 				value += "\t\t" + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = " + classPath + extraFileModel.getSimpleFileName() + "; sourceTree = \"<group>\"; };\n";
 			}
 		}
+		
 		return value;
 	}
 	
@@ -119,9 +123,11 @@ public class HackProjectFile {
 	 */
 	private static String generatePBXGroupChildren(ArrayList<ExtraFileModel> extraFileModelList) {
 		String value = "\n";
+		
 		for (ExtraFileModel extraFileModel : extraFileModelList) {
 			value += "\t\t\t\t" + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */,\n";
 		}
+		
 		return value;
 	}
 	
@@ -132,11 +138,13 @@ public class HackProjectFile {
 	 */
 	private static String generatePBXSourcesBuildPhase(ArrayList<ExtraFileModel> extraFileModelList) {
 		String value = "\n";
+		
 		for (ExtraFileModel extraFileModel : extraFileModelList) {
 			if (extraFileModel.getFileType() == ExtraFileModel.TYPE_M) {
 				value += "\t\t\t\t" + extraFileModel.getBuildRef() + " /* " + extraFileModel.getSimpleFileName() + " in Sources */,\n";
 			}
 		}
+		
 		return value;
 	}
 }
