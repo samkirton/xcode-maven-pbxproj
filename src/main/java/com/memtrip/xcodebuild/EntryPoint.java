@@ -13,9 +13,11 @@ import com.memtrip.xcodebuild.bash.BashBuilder;
 import com.memtrip.xcodebuild.pbxproj.ExtraFileModel;
 import com.memtrip.xcodebuild.pbxproj.HackProjectFile;
 import com.memtrip.xcodebuild.utils.FileUtils;
+import com.memtrip.xcodebuild.utils.StringUtils;
 
 /**
- * @author memtrip
+ * @goal generate
+ * @requiresProject false
  */
 public class EntryPoint extends AbstractMojo {
 	
@@ -58,6 +60,12 @@ public class EntryPoint extends AbstractMojo {
 	private String schemeParam;
 	
 	/**
+	 * The maven build directory
+	 * @parameter default-value="${project.build.directory}"
+	 */
+	private String mavenBuildDirectoryParam;
+	
+	/**
 	 * The default location of xcodebuild on mac
 	 */
 	private static final String DEFAULT_XCODEBUILD_EXEC = "xcodebuild";
@@ -95,6 +103,10 @@ public class EntryPoint extends AbstractMojo {
 	 */
 	public void setScheme(String newVal) {
 		schemeParam = newVal;
+	}
+	
+	public void setMavenBuildDirectory(String newVal) {
+		mavenBuildDirectoryParam = newVal;
 	}
 	
 	@Override
@@ -136,6 +148,8 @@ public class EntryPoint extends AbstractMojo {
 			schemeParam
 		);
 		
+		String symlinkPath = null;
+		
 		try {
 			ProcessBuilder builder = new ProcessBuilder(command);
 			builder.directory(new File(projectDirParam));
@@ -144,17 +158,34 @@ public class EntryPoint extends AbstractMojo {
 			
 			Scanner scanner = new Scanner(process.getInputStream());
 			StringBuilder text = new StringBuilder();
+			boolean symlinkFound = false;
 			while (scanner.hasNextLine()) {
-				text.append(scanner.nextLine());
+				String line = scanner.nextLine();
+				text.append(line);
 				text.append("\n");
+				
+				if (!symlinkFound && line.contains("-resolve-src-symlinks")) {
+					symlinkPath = StringUtils.resolveSymlinkPath(line);
+					symlinkFound = true;
+				}
 			}
 			scanner.close();
 
 			int result = process.waitFor();
 			
 			System.out.println(text.toString());
-			if (result != 0)
+			System.out.println("Build artefacts at: " + symlinkPath);
+			if (result == 0) {
+				ProcessBuilder copyProcessbuilder = BashBuilder.copyArtefact(symlinkPath,mavenBuildDirectoryParam,projectDirParam);
+				Process copyProcess = copyProcessbuilder.start();
+				int copyResult = copyProcess.waitFor();
+				if (copyResult == 0) {
+					System.out.println("OK");
+				}
+				System.out.println("TEST");
+			} else {
 				throw new MojoExecutionException("xcodebuild FAILED");
+			}
 		} catch (IOException | InterruptedException e) { 
 			throw new MojoExecutionException("xcodebuild FAILED with... \n" + e.getMessage());
 		}

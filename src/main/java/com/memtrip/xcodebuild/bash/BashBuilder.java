@@ -1,5 +1,6 @@
 package com.memtrip.xcodebuild.bash;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -27,5 +28,23 @@ public class BashBuilder {
 		commandList.toArray(commandArray);
 		
 		return commandArray;
+	}
+	
+	/**
+	 * 
+	 * @param buildProductDir
+	 * @param projectBuildDir
+	 * @return
+	 */
+	public static final ProcessBuilder copyArtefact(String buildProductDir, String projectBuildDir, String projectDir) {
+		ProcessBuilder processBuilder = new ProcessBuilder(
+			"cp",
+			"-R",
+			buildProductDir,
+			projectBuildDir + "/ios"
+		);
+		processBuilder.directory(new File(projectDir));
+		processBuilder.redirectErrorStream(true);
+		return processBuilder;
 	}
 }

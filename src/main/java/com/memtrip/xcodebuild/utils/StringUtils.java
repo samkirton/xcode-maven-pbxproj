@@ -6,6 +6,8 @@ import java.util.Random;
  * @author memtrip
  */
 public class StringUtils {
+	private static String UNIVERSAL_BUILD_TARGET = "Release-iphoneuniversal";
+	
 	/**
 	 * Build a hex string at the specified length
 	 * @param	length	Number of hex characters
@@ -19,5 +21,14 @@ public class StringUtils {
         }
 
         return sb.toString().substring(0, length);
+    }
+    
+    public static String resolveSymlinkPath(String line) {
+		String[] pathSplit = line.split("-resolve-src-symlinks");
+		String copy = pathSplit[pathSplit.length-1];
+		String[] copySplit = copy.split(" ");
+		String path = copySplit[copySplit.length-1];
+		String[] artefactDir = path.split(UNIVERSAL_BUILD_TARGET);
+		return artefactDir[0] + UNIVERSAL_BUILD_TARGET;
     }
 }
