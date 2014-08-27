@@ -18,6 +18,10 @@ public class BashBuilder {
 			commandList.add("-scheme");
 			commandList.add(scheme);
 		}
+		
+		commandList.add("-configuration");
+		commandList.add("Release");
+		commandList.add("CONFIGURATION_BUILD_DIR=/tmp/build");
 
 		String[] commandArray = new String[commandList.size()];
 		commandList.toArray(commandArray);

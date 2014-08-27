@@ -125,7 +125,7 @@ public class EntryPoint extends AbstractMojo {
 			// TODO: replace the original pbxprojectSource with a new file
 			FileUtils.persistFileOuput(
 				pbxprojSource, 
-				"/tmp/",
+				pbxProjFileLocation,
 				pbxProjFile.getName()
 			);
 		}
@@ -153,7 +153,6 @@ public class EntryPoint extends AbstractMojo {
 			int result = process.waitFor();
 			
 			System.out.println(text.toString());
-			
 			if (result != 0)
 				throw new MojoExecutionException("xcodebuild FAILED");
 		} catch (IOException | InterruptedException e) { 
