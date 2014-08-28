@@ -118,7 +118,6 @@ public class EntryPoint extends AbstractMojo {
 			xcodebuildExecParam = DEFAULT_XCODEBUILD_EXEC;
 		
 		if (projectDirParam != null && extraHeaderFilesDirParam != null && extraClassFilesDirParam != null) {
-			//proffer_dto_customer.xcodeproj/project.pbxproj
 			String pbxProjFileLocation = projectDirParam + "/" + projectNameParam + ".xcodeproj/project.pbxproj";
 			File pbxProjFile = new File(pbxProjFileLocation);
 			ArrayList<ExtraFileModel> extraFileModelList = buildExtraFileModelList(projectDirParam,projectNameParam);
@@ -137,8 +136,7 @@ public class EntryPoint extends AbstractMojo {
 			// TODO: replace the original pbxprojectSource with a new file
 			FileUtils.persistFileOuput(
 				pbxprojSource, 
-				pbxProjFileLocation,
-				pbxProjFile.getName()
+				pbxProjFileLocation
 			);
 		}
 		

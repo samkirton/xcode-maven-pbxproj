@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.memtrip</groupId>
     <artifactId>xcode-maven-build</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <packaging>maven-plugin</packaging>
     <name>xcodebuild maven plugin</name>
     <description>Runs the xcodebuild executable and has the option of adding additional sources on the fly</description>
@@ -13,11 +13,11 @@
     <distributionManagement>
         <repository>
             <id>repo</id>
-            <url>https://raw.github.com/25344/93723/master/release</url>
+            <url>https://raw.github.com/25344/34944/master/release</url>
         </repository>
         <snapshotRepository>
             <id>snapshot-repo</id>
-            <url>https://raw.github.com/25344/93723/master/snapshot</url>
+            <url>https://raw.github.com/25344/34944/master/snapshot</url>
         </snapshotRepository>
     </distributionManagement>
     

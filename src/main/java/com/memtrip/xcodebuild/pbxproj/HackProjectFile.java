@@ -58,7 +58,7 @@ public class HackProjectFile {
 		    position+=line.length();
 		    position+=1; // include new lines (\n)
 		}
-	
+		
 		return sb.toString();
 	}
 	

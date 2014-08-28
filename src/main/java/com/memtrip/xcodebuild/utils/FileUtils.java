@@ -71,19 +71,17 @@ public class FileUtils {
 	 * Persist the file output string to a file
 	 * @param	fileOutput	The file output string that is being saved to a file
 	 * @param	filePath	The path where the final file will reside
-	 * @param	fileName	Name of the file
-	 * @param	fileExtension	File extension 
 	 */
-	public static void persistFileOuput(String fileOutput, String filePath, String fileName) {		
+	public static void persistFileOuput(String fileOutput, String filePath) {		
 		try {
-			BufferedWriter out = new BufferedWriter(new FileWriter(filePath + fileName));
+			BufferedWriter out = new BufferedWriter(new FileWriter(filePath));
 			out.write(fileOutput);
 			out.close();
 		} catch (IOException e) {
-			System.out.println("> FAILED to write file " + fileName);		
+			System.out.println("> FAILED to write file to" + filePath);		
 			System.exit(0);
 		}
 		
-		System.out.println("> " + fileName + " has been written to: " + filePath);
+		System.out.println("> file has been written to: " + filePath);
 	}
 }
