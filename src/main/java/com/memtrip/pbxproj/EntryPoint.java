@@ -1,19 +1,16 @@
-package com.memtrip.xcodebuild;
+package com.memtrip.pbxproj;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
-import com.memtrip.xcodebuild.bash.BashBuilder;
-import com.memtrip.xcodebuild.pbxproj.ExtraFileModel;
-import com.memtrip.xcodebuild.pbxproj.HackProjectFile;
-import com.memtrip.xcodebuild.utils.FileUtils;
-import com.memtrip.xcodebuild.utils.StringUtils;
+import com.memtrip.pbxproj.hack.FileInjector;
+import com.memtrip.pbxproj.model.FileInjectionModel;
+import com.memtrip.pbxproj.utils.FileUtils;
 
 /**
  * @goal generate
@@ -54,18 +51,6 @@ public class EntryPoint extends AbstractMojo {
 	private String projectDirParam;
 	
 	/**
-	 * An optional scheme that the xcodebuild should target
-	 * @parameter
-	 */
-	private String schemeParam;
-	
-	/**
-	 * The maven build directory
-	 * @parameter default-value="${project.build.directory}"
-	 */
-	private String mavenBuildDirectoryParam;
-	
-	/**
 	 * The default location of xcodebuild on mac
 	 */
 	private static final String DEFAULT_XCODEBUILD_EXEC = "xcodebuild";
@@ -98,17 +83,6 @@ public class EntryPoint extends AbstractMojo {
 		projectDirParam = newVal;
 	}
 	
-	/**
-	 * scheme
-	 */
-	public void setScheme(String newVal) {
-		schemeParam = newVal;
-	}
-	
-	public void setMavenBuildDirectory(String newVal) {
-		mavenBuildDirectoryParam = newVal;
-	}
-	
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (projectNameParam == null)
@@ -120,7 +94,7 @@ public class EntryPoint extends AbstractMojo {
 		if (projectDirParam != null && extraHeaderFilesDirParam != null && extraClassFilesDirParam != null) {
 			String pbxProjFileLocation = projectDirParam + "/" + projectNameParam + ".xcodeproj/project.pbxproj";
 			File pbxProjFile = new File(pbxProjFileLocation);
-			ArrayList<ExtraFileModel> extraFileModelList = buildExtraFileModelList(projectDirParam,projectNameParam);
+			ArrayList<FileInjectionModel> extraFileModelList = buildExtraFileModelList(projectDirParam,projectNameParam);
 			
 			if (!pbxProjFile.exists())
 				throw new IllegalStateException("pbxProjFile could not be found");
@@ -128,73 +102,22 @@ public class EntryPoint extends AbstractMojo {
 			// modify the pbxproj file with the extra M / H sources
 			String pbxprojSource = null;
 			try {
-				pbxprojSource = HackProjectFile.update(projectNameParam, pbxProjFileLocation, extraHeaderFilesDirParam, extraClassFilesDirParam, extraFileModelList);
+				pbxprojSource = FileInjector.update(projectNameParam, pbxProjFileLocation, extraHeaderFilesDirParam, extraClassFilesDirParam, extraFileModelList);
 			} catch (IOException e) { 
 				throw new IllegalStateException(e.getMessage());
 			}
 			
-			// TODO: replace the original pbxprojectSource with a new file
 			FileUtils.persistFileOuput(
 				pbxprojSource, 
 				pbxProjFileLocation
 			);
-		}
-		
-		// create the xcodebuild command
-		String[] command = BashBuilder.xcodebuild(
-			xcodebuildExecParam, 
-			schemeParam
-		);
-		
-		String symlinkPath = null;
-		
-		try {
-			ProcessBuilder builder = new ProcessBuilder(command);
-			builder.directory(new File(projectDirParam));
-			builder.redirectErrorStream(true);
-			Process process =  builder.start();
-			
-			Scanner scanner = new Scanner(process.getInputStream());
-			StringBuilder text = new StringBuilder();
-			boolean symlinkFound = false;
-			while (scanner.hasNextLine()) {
-				String line = scanner.nextLine();
-				text.append(line);
-				text.append("\n");
-				
-				if (!symlinkFound && line.contains("-resolve-src-symlinks")) {
-					symlinkPath = StringUtils.resolveSymlinkPath(line);
-					symlinkFound = true;
-				}
-			}
-			scanner.close();
-
-			int result = process.waitFor();
-			
-			System.out.println(text.toString());
-			System.out.println("Build artefacts at: " + symlinkPath);
-			if (result == 0) {
-				ProcessBuilder copyProcessbuilder = BashBuilder.copyArtefact(symlinkPath,mavenBuildDirectoryParam,projectDirParam);
-				Process copyProcess = copyProcessbuilder.start();
-				int copyResult = copyProcess.waitFor();
-				if (copyResult == 0) {
-					System.out.println("OK");
-				}
-				System.out.println("TEST");
-			} else {
-				throw new MojoExecutionException("xcodebuild FAILED");
-			}
-		} catch (IOException e) { 
-			throw new MojoExecutionException("xcodebuild FAILED with... \n" + e.getMessage());
-		} catch (InterruptedException e) {
-			throw new MojoExecutionException("xcodebuild FAILED with... \n" + e.getMessage());
 		}
 	}
 	
 	/**
 	 * @return	A list of ExteaFileModel objects
 	 */
-	public ArrayList<ExtraFileModel> buildExtraFileModelList(String projectDir, String projectName) {
+	public ArrayList<FileInjectionModel> buildExtraFileModelList(String projectDir, String projectName) {
 		ArrayList<String> extraMSources = new ArrayList<String>();
 		ArrayList<String> extraHSources = new ArrayList<String>();
 		
@@ -202,8 +125,8 @@ public class EntryPoint extends AbstractMojo {
 		
 		FileUtils.getFilePaths(new File(projectSourceDir + extraClassFilesDirParam), ".m", extraMSources);
 		FileUtils.getFilePaths(new File(projectSourceDir + extraHeaderFilesDirParam), ".h", extraHSources);
-		ArrayList<ExtraFileModel> extraFileModelList = FileUtils.generateHackProjectFileList(extraMSources, ExtraFileModel.TYPE_M);
-		extraFileModelList.addAll(FileUtils.generateHackProjectFileList(extraHSources, ExtraFileModel.TYPE_H));
-		return extraFileModelList;
+		ArrayList<FileInjectionModel> fileInjectionModelList = FileUtils.generateHackProjectFileList(extraMSources, FileInjectionModel.TYPE_M);
+		fileInjectionModelList.addAll(FileUtils.generateHackProjectFileList(extraHSources, FileInjectionModel.TYPE_H));
+		return fileInjectionModelList;
 	}
 }	

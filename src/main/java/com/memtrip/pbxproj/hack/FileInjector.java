@@ -1,4 +1,4 @@
-package com.memtrip.xcodebuild.pbxproj;
+package com.memtrip.pbxproj.hack;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,11 +6,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.memtrip.pbxproj.model.FileInjectionModel;
+
 
 /**
  * @author memtrip
  */
-public class HackProjectFile {
+public class FileInjector {
 	private static final String PBX_BUILD_FILE = "/* End PBXBuildFile section */";
 	private static final String PBX_COPY_FILES = "name = \"Copy Files\";";
 	private static final String PBX_FILE_REFERENCE = "/* End PBXFileReference section */";
@@ -21,7 +23,7 @@ public class HackProjectFile {
 			String filePath, 
 			String headerPath,
 			String classPath,
-			ArrayList<ExtraFileModel> extraFileModelList) throws IOException {
+			ArrayList<FileInjectionModel> fileInjectionModelList) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		final String newLine = System.getProperty("line.separator");
 		
@@ -30,27 +32,27 @@ public class HackProjectFile {
 		String line;
 		while ((line = bufferedReader.readLine()) != null) {
 		    if (line.contains(PBX_BUILD_FILE)) {
-		    	String value = generatePBXBuildFileLine(extraFileModelList);
+		    	String value = generatePBXBuildFileLine(fileInjectionModelList);
 		    	sb.insert(position, value);
 		    	position += value.length();
 		    } else if (line.contains(PBX_COPY_FILES)) {
 		    	int positionOffset = 6;
-		    	String value = generatePBXCopyFiles(extraFileModelList);
+		    	String value = generatePBXCopyFiles(fileInjectionModelList);
 		    	sb.insert(position-positionOffset, value);
 		    	position += value.length();
 		    } else if (line.contains(PBX_FILE_REFERENCE)) {
-		    	String value = generatePBXBuildFileReference(extraFileModelList, headerPath, classPath);
+		    	String value = generatePBXBuildFileReference(fileInjectionModelList, headerPath, classPath);
 		    	sb.insert(position, value);
 		    	position += value.length();
 		    } else if (line.contains(String.format(PBX_GROUP_CHILDREN, projectName))) {
 		    	int positionOffset = 7;
-		    	String value = generatePBXGroupChildren(extraFileModelList);
-		    	sb.insert(position-positionOffset, generatePBXGroupChildren(extraFileModelList));
+		    	String value = generatePBXGroupChildren(fileInjectionModelList);
+		    	sb.insert(position-positionOffset, generatePBXGroupChildren(fileInjectionModelList));
 		    	position += value.length();
 		    } else if (line.contains(PBX_SOURCES_BUILD_PHASE)) {
 		    	int positionOffset = 55;
-		    	String value = generatePBXSourcesBuildPhase(extraFileModelList);
-		    	sb.insert(position-positionOffset, generatePBXSourcesBuildPhase(extraFileModelList));
+		    	String value = generatePBXSourcesBuildPhase(fileInjectionModelList);
+		    	sb.insert(position-positionOffset, generatePBXSourcesBuildPhase(fileInjectionModelList));
 		    	position += value.length();
 		    }
 		    
@@ -69,11 +71,11 @@ public class HackProjectFile {
 	 * @param	extraFileModelList	The extraFileModelList to build the PBXBuildFileLine for
 	 * @return	The PBXBuildFileLine file references
 	 */
-	private static String generatePBXBuildFileLine(ArrayList<ExtraFileModel> extraFileModelList) {
+	private static String generatePBXBuildFileLine(ArrayList<FileInjectionModel> extraFileModelList) {
 		String value = "\n";
 		
-		for (ExtraFileModel extraFileModel : extraFileModelList) {
-			if (extraFileModel.getFileType() == ExtraFileModel.TYPE_H) {
+		for (FileInjectionModel extraFileModel : extraFileModelList) {
+			if (extraFileModel.getFileType() == FileInjectionModel.TYPE_H) {
 				value += "\t\t" + extraFileModel.getBuildRef() + " /* " + extraFileModel.getSimpleFileName() + " in Copy Files */ = {isa = PBXBuildFile; fileRef = " + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */;};\n";
 			} else {
 				value += "\t\t" + extraFileModel.getBuildRef() + " /* " + extraFileModel.getSimpleFileName() + " in Sources */ = {isa = PBXBuildFile; fileRef = " + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */; };\n";
@@ -88,11 +90,11 @@ public class HackProjectFile {
 	 * @param	extraFileModelList	The extraFileModelList to build the PBXCopyFiles for
 	 * @return	The PBXCopyFiles file references
 	 */
-	private static String generatePBXCopyFiles(ArrayList<ExtraFileModel> extraFileModelList) {
+	private static String generatePBXCopyFiles(ArrayList<FileInjectionModel> extraFileModelList) {
 		String value = "";
 		
-		for (ExtraFileModel extraFileModel : extraFileModelList) {
-			if (extraFileModel.getFileType() == ExtraFileModel.TYPE_H) {
+		for (FileInjectionModel extraFileModel : extraFileModelList) {
+			if (extraFileModel.getFileType() == FileInjectionModel.TYPE_H) {
 				value += "\t\t\t\t" + extraFileModel.getBuildRef() + " /* " + extraFileModel.getSimpleFileName() + " in Copy Files */,\n";
 			}
 		}
@@ -104,11 +106,11 @@ public class HackProjectFile {
 	 * @param	extraFileModelList	The extraFileModelList to build the PBXBuildFileReference for
 	 * @return	The PBXBuildFileReference file references
 	 */
-	private static String generatePBXBuildFileReference(ArrayList<ExtraFileModel> extraFileModelList, String headerPath, String classPath) {
+	private static String generatePBXBuildFileReference(ArrayList<FileInjectionModel> extraFileModelList, String headerPath, String classPath) {
 		String value = "";
 		
-		for (ExtraFileModel extraFileModel : extraFileModelList) {
-			if (extraFileModel.getFileType() == ExtraFileModel.TYPE_H) {
+		for (FileInjectionModel extraFileModel : extraFileModelList) {
+			if (extraFileModel.getFileType() == FileInjectionModel.TYPE_H) {
 				value += "\t\t" + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = " + headerPath + extraFileModel.getSimpleFileName() + "; sourceTree = \"<group>\"; };\n";
 			} else {
 				value += "\t\t" + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = " + classPath + extraFileModel.getSimpleFileName() + "; sourceTree = \"<group>\"; };\n";
@@ -123,10 +125,10 @@ public class HackProjectFile {
 	 * @param	extraFileModelList	The extraFileModelList to build the PBXGroupChildren for
 	 * @return	The PBXGroupChildren file references
 	 */
-	private static String generatePBXGroupChildren(ArrayList<ExtraFileModel> extraFileModelList) {
+	private static String generatePBXGroupChildren(ArrayList<FileInjectionModel> extraFileModelList) {
 		String value = "\n";
 		
-		for (ExtraFileModel extraFileModel : extraFileModelList) {
+		for (FileInjectionModel extraFileModel : extraFileModelList) {
 			value += "\t\t\t\t" + extraFileModel.getFileRef() + " /* " + extraFileModel.getSimpleFileName() + " */,\n";
 		}
 		
@@ -138,11 +140,11 @@ public class HackProjectFile {
 	 * @param	extraFileModelList	The extraFileModelList to build the PBXSources for
 	 * @return	The PBXSources file references
 	 */
-	private static String generatePBXSourcesBuildPhase(ArrayList<ExtraFileModel> extraFileModelList) {
+	private static String generatePBXSourcesBuildPhase(ArrayList<FileInjectionModel> extraFileModelList) {
 		String value = "\n";
 		
-		for (ExtraFileModel extraFileModel : extraFileModelList) {
-			if (extraFileModel.getFileType() == ExtraFileModel.TYPE_M) {
+		for (FileInjectionModel extraFileModel : extraFileModelList) {
+			if (extraFileModel.getFileType() == FileInjectionModel.TYPE_M) {
 				value += "\t\t\t\t" + extraFileModel.getBuildRef() + " /* " + extraFileModel.getSimpleFileName() + " in Sources */,\n";
 			}
 		}

@@ -1,4 +1,4 @@
-package com.memtrip.xcodebuild.utils;
+package com.memtrip.pbxproj.utils;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -6,7 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.memtrip.xcodebuild.pbxproj.ExtraFileModel;
+import com.memtrip.pbxproj.model.FileInjectionModel;
 
 /**
  * @author memtrip
@@ -45,10 +45,10 @@ public class FileUtils {
 	 * @param	projectFileList	The file list to build the ExtraFileModel from
 	 * @return	A list of ExtraFileModel built based on the provided projectFileList
 	 */
-	public static ArrayList<ExtraFileModel> generateHackProjectFileList(ArrayList<String> projectFileList, int type) {
-		ArrayList<ExtraFileModel> extraFileModelList = new ArrayList<ExtraFileModel>();
+	public static ArrayList<FileInjectionModel> generateHackProjectFileList(ArrayList<String> projectFileList, int type) {
+		ArrayList<FileInjectionModel> extraFileModelList = new ArrayList<FileInjectionModel>();
 		for (String filePath : projectFileList)
-			extraFileModelList.add(new ExtraFileModel(filePath, type));
+			extraFileModelList.add(new FileInjectionModel(filePath, type));
 		return extraFileModelList;
 	}
 	

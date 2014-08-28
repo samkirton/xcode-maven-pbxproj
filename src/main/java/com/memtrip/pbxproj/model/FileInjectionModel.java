@@ -1,11 +1,11 @@
-package com.memtrip.xcodebuild.pbxproj;
+package com.memtrip.pbxproj.model;
 
-import com.memtrip.xcodebuild.utils.StringUtils;
+import com.memtrip.pbxproj.utils.StringUtils;
 
 /**
  * @author memtrip
  */
-public class ExtraFileModel {
+public class FileInjectionModel {
 	private String filePath;
 	private int fileType;
 	private String buildRef;
@@ -14,7 +14,7 @@ public class ExtraFileModel {
 	public static final int TYPE_H = 0x1;
 	public static final int TYPE_M = 0x2;
 	
-	public ExtraFileModel(String filePath, int fileType) {
+	public FileInjectionModel(String filePath, int fileType) {
 		this.filePath = filePath;
 		this.fileType = fileType;
 		this.buildRef = StringUtils.getRandomHexString(24).toUpperCase();

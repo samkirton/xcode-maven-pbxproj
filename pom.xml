@@ -4,11 +4,11 @@
     http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.memtrip</groupId>
-    <artifactId>xcode-maven-build</artifactId>
-    <version>1.2</version>
+    <artifactId>xcode-maven-pbxproj</artifactId>
+    <version>1.0</version>
     <packaging>maven-plugin</packaging>
-    <name>xcode-maven-build</name>
-    <description>xcode-maven-build</description>
+    <name>xcode-maven-pbxproj</name>
+    <description>xcode-maven-pbxproj</description>
     
     <distributionManagement>
         <repository>
