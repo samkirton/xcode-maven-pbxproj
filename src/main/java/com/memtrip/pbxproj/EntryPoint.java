@@ -8,12 +8,12 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
-import com.memtrip.pbxproj.hack.FileInjector;
+import com.memtrip.pbxproj.inject.FileInjector;
 import com.memtrip.pbxproj.model.FileInjectionModel;
 import com.memtrip.pbxproj.utils.FileUtils;
 
 /**
- * @goal generate
+ * @goal inject
  * @requiresProject false
  */
 public class EntryPoint extends AbstractMojo {
@@ -39,21 +39,10 @@ public class EntryPoint extends AbstractMojo {
 	private String extraClassFilesDirParam;
 	
 	/**
-	 * The location of the xcodebuild executable
-	 * @parameter
-	 */
-	private String xcodebuildExecParam;
-	
-	/**
 	 * The location of the project file
 	 * @parameter
 	 */
 	private String projectDirParam;
-	
-	/**
-	 * The default location of xcodebuild on mac
-	 */
-	private static final String DEFAULT_XCODEBUILD_EXEC = "xcodebuild";
 	
 	/**
 	 * projectName	
@@ -87,9 +76,6 @@ public class EntryPoint extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (projectNameParam == null)
 			throw new IllegalStateException("<projectName> parameter could not be found");
-		
-		if (xcodebuildExecParam == null)
-			xcodebuildExecParam = DEFAULT_XCODEBUILD_EXEC;
 		
 		if (projectDirParam != null && extraHeaderFilesDirParam != null && extraClassFilesDirParam != null) {
 			String pbxProjFileLocation = projectDirParam + "/" + projectNameParam + ".xcodeproj/project.pbxproj";

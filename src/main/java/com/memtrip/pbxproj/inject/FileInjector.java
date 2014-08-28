@@ -1,4 +1,4 @@
-package com.memtrip.pbxproj.hack;
+package com.memtrip.pbxproj.inject;
 
 import java.io.BufferedReader;
 import java.io.File;
