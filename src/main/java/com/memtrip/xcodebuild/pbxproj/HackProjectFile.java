@@ -1,11 +1,10 @@
 package com.memtrip.xcodebuild.pbxproj;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -26,9 +25,10 @@ public class HackProjectFile {
 		StringBuilder sb = new StringBuilder();
 		final String newLine = System.getProperty("line.separator");
 		
-		List<String> lines = Files.readAllLines(Paths.get(filePath),Charset.defaultCharset());
 		int position = 0;
-		for (String line : lines) {
+		BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(filePath)));
+		String line;
+		while ((line = bufferedReader.readLine()) != null) {
 		    if (line.contains(PBX_BUILD_FILE)) {
 		    	String value = generatePBXBuildFileLine(extraFileModelList);
 		    	sb.insert(position, value);
@@ -58,6 +58,8 @@ public class HackProjectFile {
 		    position+=line.length();
 		    position+=1; // include new lines (\n)
 		}
+		
+		bufferedReader.close();
 		
 		return sb.toString();
 	}

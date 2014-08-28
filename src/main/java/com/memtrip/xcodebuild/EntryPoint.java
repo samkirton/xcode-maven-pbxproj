@@ -184,7 +184,9 @@ public class EntryPoint extends AbstractMojo {
 			} else {
 				throw new MojoExecutionException("xcodebuild FAILED");
 			}
-		} catch (IOException | InterruptedException e) { 
+		} catch (IOException e) { 
+			throw new MojoExecutionException("xcodebuild FAILED with... \n" + e.getMessage());
+		} catch (InterruptedException e) {
 			throw new MojoExecutionException("xcodebuild FAILED with... \n" + e.getMessage());
 		}
 	}
